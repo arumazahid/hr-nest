@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { sb } from '@/lib/supabase'
+import { toast } from './Toast'
 
 const ics = (i: any, tz: string) => {
   const f = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
@@ -22,10 +23,23 @@ export default function Interviews({ company }: { company: any }) {
   useEffect(() => { load() }, [])
 
   const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { timeZone: company.timezone, dateStyle: 'medium', timeStyle: 'short' })
+  async function call(body: any) {
+    const { data } = await sb.auth.getSession()
+    const res = await fetch('/api/interview/result', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + data.session?.access_token }, body: JSON.stringify(body) })
+    return res.json()
+  }
+  const report = (out: any, what: string, who: string) => {
+    if (out.error) return toast(out.error, 'err')
+    if (out.emailed === true) toast(`${what} email sent to ${who}`)
+    else if (out.emailed === false) toast(`Saved, but the email was NOT sent: ${out.reason}`, 'err')
+  }
   async function setResult(i: any, result: string) {
-    await sb.from('interviews').update({ result, status: 'completed' }).eq('id', i.id)
-    if (result === 'selected' || result === 'rejected') await sb.from('candidates').update({ status: result }).eq('id', i.candidate_id)
-    load()
+    const out = await call({ interviewId: i.id, result })
+    if (!out.error && out.emailed == null) toast('Result saved')
+    report(out, 'Selection', i.candidates?.name || 'the candidate'); load()
+  }
+  async function resend(i: any) {
+    report(await call({ interviewId: i.id, action: 'resend' }), 'Invitation', i.candidates?.name || 'the candidate')
   }
   const now = Date.now()
   const upcoming = rows.filter(i => i.status === 'scheduled' && new Date(i.scheduled_at).getTime() >= now - 3600000)
@@ -41,6 +55,7 @@ export default function Interviews({ company }: { company: any }) {
       <select style={{ width: 150 }} value={i.result} onChange={e => setResult(i, e.target.value)}>
         <option value="pending">Result: pending</option><option value="selected">Selected</option><option value="hold">On hold</option><option value="rejected">Rejected</option>
       </select>
+      {i.status === 'scheduled' && <button className="btn ghost" style={{ marginTop: 0 }} onClick={() => resend(i)}>Resend email</button>}
       <button className="btn ghost" style={{ marginTop: 0 }} onClick={() => ics(i, company.timezone)}>Add to calendar</button>
       {i.status === 'scheduled' && <button className="btn ghost" style={{ marginTop: 0 }} onClick={async () => { await sb.from('interviews').update({ status: 'cancelled' }).eq('id', i.id); load() }}>Cancel</button>}
     </div>
@@ -48,7 +63,7 @@ export default function Interviews({ company }: { company: any }) {
 
   return (
     <>
-      <p className="muted">Schedule interviews from the Candidates page. The candidate gets an email invitation if your Gmail is connected in Settings.</p>
+      <p className="muted">Schedule interviews from the Candidates page. The candidate gets an invitation email, and a selection email when you mark them Selected. This needs your Gmail connected in Settings; if an email cannot be sent you will see the reason here.</p>
       <h3>Upcoming ({upcoming.length})</h3>
       {upcoming.length === 0 && <p className="muted">No interviews scheduled.</p>}
       {upcoming.map(card)}

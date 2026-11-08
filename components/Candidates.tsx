@@ -93,7 +93,7 @@ export default function Candidates({ company }: { company: any }) {
     })
     const out = await res.json()
     if (!res.ok) return setIvMsg(out.error)
-    setSched(null); setIvMsg(''); setMsg(`Interview scheduled for ${sched.name}${out.emailed ? ' and an invitation email was sent (if your Gmail is set up in Settings)' : '. This candidate has no email, so nothing was sent'}`)
+    setSched(null); setIvMsg(''); setMsg(`Interview scheduled for ${sched.name}. ${out.emailed ? 'Invitation email sent.' : 'The invitation email was NOT sent: ' + (out.reason || 'unknown reason') + '. You can resend it from the Interviews page once this is fixed.'}`)
     loadAll()
   }
 
