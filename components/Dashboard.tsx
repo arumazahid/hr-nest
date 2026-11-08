@@ -154,7 +154,7 @@ export default function Dashboard({ company, role, name }: { company: any; role:
     <>
       <div className="hero2">
         <div>
-          <h1>{greet}{name ? ', ' + name.split(' ')[0] : ''}</h1>
+          <h1>{greet}{name ? ', ' + (name.includes('@') ? name.split('@')[0].replace(/[._-]?\d+$/, '').replace(/[._-]+/g, ' ') : name.split(' ')[0]).replace(/^./, (c: string) => c.toUpperCase()) : ''}</h1>
           <p>{dateText} · {company.name}</p>
         </div>
         <div className="heroside">

@@ -127,7 +127,7 @@ export default function Home() {
       {kiosk && <Kiosk company={company} onExit={() => setKiosk(false)} />}
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
       <aside className={'side' + (open ? ' open' : '')}>
-        <div className="brandlogo side"><img src="/logo.png" alt="HR Nest" /></div>
+        <div className="brandlogo inside"><img src="/logo.png" alt="HR Nest" /></div>
         {NAV.map(g => {
           const items = g.items.filter(i => ACCESS[i].includes(me.role))
           if (!items.length) return null
