@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { sb } from '@/lib/supabase'
 import { zoned } from '@/lib/time'
 import MailComposer from './MailComposer'
-import MailTemplates from './MailTemplates'
+import { CalendarPlus, Check, X, FileText, Phone, MessageCircle, Trash2 } from 'lucide-react'
 import { buildVars, fillTemplate, DEFAULTS } from '@/lib/templates'
 
 const COLORS: Record<string, string> = { 'Perfect Match': '#16a34a', 'Good Match': '#2563eb', Average: '#f97316', 'Bad Match': '#dc2626' }
@@ -71,13 +71,25 @@ export default function Candidates({ company }: { company: any }) {
     if (d.startsWith('0') && company.timezone === 'Asia/Karachi') d = '92' + d.slice(1)
     return d ? 'https://wa.me/' + d : ''
   }
-  const quick = (c: any) => (
-    <>
-      <button className="btn" style={{ marginTop: 0 }} onClick={() => { setCompose({ c, kind: 'selected' }); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Select</button>
-      <button className="btn ghost" style={{ marginTop: 0 }} onClick={() => { setCompose({ c, kind: 'rejected' }); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Reject</button>
-      {c.phone && <a className="btn ghost sm" style={{ textDecoration: 'none' }} href={'tel:' + c.phone}>Call</a>}
-      {waLink(c.phone) && <a className="btn ghost sm" style={{ textDecoration: 'none' }} href={waLink(c.phone)} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
-    </>
+  const startCompose = (c: any, kind: string) => { setCompose({ c, kind }); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  // A few clear buttons for the decision, small round icons for everything else.
+  const actions = (c: any, compact = false) => (
+    <div className="actrow">
+      {compact
+        ? <button className="ib" title="Schedule interview" onClick={() => openSched(c)}><CalendarPlus size={16} /></button>
+        : <button className="btn sm" onClick={() => openSched(c)}><CalendarPlus size={15} /> Interview</button>}
+      {compact
+        ? <button className="ib good" title="Select and email" onClick={() => startCompose(c, 'selected')}><Check size={16} /></button>
+        : <button className="btn sm good" onClick={() => startCompose(c, 'selected')}><Check size={15} /> Select</button>}
+      {compact
+        ? <button className="ib bad" title="Reject and email" onClick={() => startCompose(c, 'rejected')}><X size={16} /></button>
+        : <button className="btn sm bad" onClick={() => startCompose(c, 'rejected')}><X size={15} /> Reject</button>}
+      <span className="sep" />
+      <button className="ib" title="View CV" onClick={() => viewCv(c.id)}><FileText size={16} /></button>
+      {c.phone && <a className="ib" title="Call" href={'tel:' + c.phone}><Phone size={16} /></a>}
+      {waLink(c.phone) && <a className="ib wa" title="WhatsApp" href={waLink(c.phone)} target="_blank" rel="noopener noreferrer"><MessageCircle size={16} /></a>}
+      {compact && <button className="ib bad" title="Delete candidate" onClick={async () => { if (confirm('Delete this candidate?')) { await sb.from('candidates').delete().eq('id', c.id); loadAll(); loadRows(jobId) } }}><Trash2 size={16} /></button>}
+    </div>
   )
 
   async function token() { return (await sb.auth.getSession()).data.session?.access_token }
@@ -139,11 +151,9 @@ export default function Candidates({ company }: { company: any }) {
       <div className="tabs">
         <button className={'tab' + (view === 'rank' ? ' on' : '')} onClick={() => setView('rank')}>Rankings</button>
         <button className={'tab' + (view === 'all' ? ' on' : '')} onClick={() => setView('all')}>All candidates ({all.length})</button>
-        <button className={'tab' + (view === 'templates' ? ' on' : '')} onClick={() => setView('templates')}>Email templates</button>
       </div>
       {compose && <MailComposer company={company} cand={compose.c} kind={compose.kind} position={positionOf(compose.c)} templates={templates}
         onClose={() => setCompose(null)} onDone={() => { setCompose(null); loadAll(); loadRows(jobId) }} />}
-      {view === 'templates' && <MailTemplates company={company} templates={templates} onSaved={loadTemplates} />}
       {sched && (
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Schedule interview: {sched.name}</h3>
@@ -220,11 +230,7 @@ export default function Candidates({ company }: { company: any }) {
                       <div className="card"><b style={{ color: '#16a34a' }}>Matches</b>{r.details.match.map((m: string[]) => <div className="drow" key={m[0]}><b>{m[0]}</b><span>{m[1]}</span></div>)}</div>
                       <div className="card"><b style={{ color: '#dc2626' }}>Gaps</b>{r.details.miss.map((m: string[]) => <div className="drow" key={m[0] + m[1]}><b>{m[0]}</b><span>{m[1]}</span></div>)}</div>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                      <button className="btn ghost" style={{ marginTop: 0 }} onClick={() => viewCv(r.candidates.id)}>View CV</button>
-                      <button className="btn" style={{ marginTop: 0 }} onClick={() => openSched({ ...r.candidates })}>Schedule interview</button>
-                      {quick(r.candidates)}
-                    </div>
+                    <div style={{ marginBottom: 12 }}>{actions(r.candidates)}</div>
                   </>
                 )}
               </div>
@@ -255,9 +261,7 @@ export default function Candidates({ company }: { company: any }) {
                           {STATUS.map(s => <option key={s}>{s}</option>)}
                         </select>
                       </td>
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        <a style={{ cursor: 'pointer' }} onClick={() => viewCv(c.id)}>View CV</a> · <a style={{ cursor: 'pointer' }} onClick={() => openSched(c)}>Interview</a> · <a style={{ cursor: 'pointer' }} onClick={() => { setCompose({ c, kind: 'selected' }); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Select</a> · <a style={{ cursor: 'pointer' }} onClick={() => { setCompose({ c, kind: 'rejected' }); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Reject</a> · <a style={{ cursor: 'pointer', color: '#dc2626' }} onClick={async () => { if (confirm('Delete this candidate?')) { await sb.from('candidates').delete().eq('id', c.id); loadAll(); loadRows(jobId) } }}>Delete</a>
-                      </td>
+                      <td>{actions(c, true)}</td>
                     </tr>
                   ))}
                 </tbody>

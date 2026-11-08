@@ -367,3 +367,45 @@ tbody tr:hover { background: #FAFBFD }
 .banner.errbanner { background: #FEF2F2; color: #991B1B; border-color: #FECACA }
 .banner { padding: 12px 16px; border-radius: 12px; border: 1px solid; margin-bottom: 16px; font-size: 14px }
 @media (max-width: 900px) { .upgrid { grid-template-columns: 1fr } .levels { grid-template-columns: 1fr 1fr } }
+
+/* sections: few sidebar entries, tabs inside */
+.sectabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; padding: 6px; background: #fff; border: 1px solid var(--line); border-radius: 999px; width: fit-content; max-width: 100%; box-shadow: 0 1px 2px #0f172a0a }
+.sectab { background: none; border: 0; border-radius: 999px; padding: 8px 18px; font: inherit; font-size: 14px; font-weight: 600; color: #64748B; cursor: pointer; text-decoration: none; display: inline-flex; gap: 6px; align-items: center; transition: background .15s, color .15s }
+.sectab:hover { background: #F1F5F9; color: var(--ink) }
+.sectab.on { background: #FEF3C7; color: #713F12; box-shadow: inset 0 0 0 1px #FACC15 }
+.content .tabs { display: inline-flex; gap: 6px; background: #EEF2F7; padding: 4px; border-radius: 12px; margin: 0 0 16px }
+.content .tabs .tab { border: 0; background: none; padding: 6px 14px; font-size: 13px }
+.content .tabs .tab.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px #0f172a1f }
+
+/* fewer, softer buttons */
+.actrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.actrow .sep { width: 1px; height: 22px; background: var(--line); margin: 0 2px }
+.btn.good { background: #16A34A }
+.btn.good:hover { background: #15803D }
+.btn.bad { background: #FEE2E2; color: #B91C1C }
+.btn.bad:hover { background: #FECACA }
+.ib { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: #475569; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; transition: background .15s, color .15s }
+.ib:hover { background: #F1F5F9; color: var(--ink) }
+.ib.good:hover { background: #DCFCE7; color: #166534 }
+.ib.bad { color: #B91C1C }
+.ib.bad:hover { background: #FEE2E2 }
+.ib.wa { color: #16A34A }
+.ib.wa:hover { background: #DCFCE7 }
+
+/* community */
+.hero2.light { background: linear-gradient(120deg, #FFF7D6, #FDE68A); color: var(--ink) }
+.hero2.light p { color: #713F12 }
+.commgrid { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 16px; align-items: start }
+.commlist { display: grid; gap: 8px }
+.thread { text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer; font: inherit; display: block; width: 100%; transition: border-color .15s, box-shadow .15s }
+.thread:hover { border-color: #FACC15 }
+.thread.on { border-color: #FACC15; box-shadow: 0 0 0 3px #FACC1533 }
+.threadtop { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; margin-bottom: 4px }
+.emptycomm { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 36px 20px; text-align: center; color: #94A3B8 }
+.postbody { white-space: pre-wrap; margin: 6px 0 }
+.replies { display: grid; gap: 10px; margin: 14px 0 }
+.reply { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; background: #F8FAFC }
+.reply.hr { background: #FFFBEB; border: 1px solid #FDE68A }
+.replybox { display: flex; gap: 8px }
+.replybox input { flex: 1 }
+@media (max-width: 900px) { .commgrid { grid-template-columns: 1fr } }

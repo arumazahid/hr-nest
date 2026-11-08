@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Camera, Users as UsersIcon, Building2, Wallet, FileText, Briefcase, Bot, ShieldCheck, Settings as Cog, LogOut, Menu, CalendarDays, CalendarCheck, ClipboardList, BarChart3, Mail, CreditCard, UserCircle, ClipboardCheck, ExternalLink } from 'lucide-react'
+import { LayoutDashboard, Camera, Users as UsersIcon, Building2, Wallet, FileText, Briefcase, Bot, ShieldCheck, Settings as Cog, LogOut, Menu, CalendarDays, CalendarCheck, ClipboardList, BarChart3, Mail, CreditCard, UserCircle, ClipboardCheck, ExternalLink, MessageCircle } from 'lucide-react'
 import { sb } from '@/lib/supabase'
-import { ACCESS, WRITE, NAV, LABEL, TITLES, SELF_CONTAINED, LINKS } from '@/lib/roles'
+import { ACCESS, WRITE, SECTIONS, LABEL, TABLABEL, TITLES, SELF_CONTAINED, LINKS } from '@/lib/roles'
+import Community from '@/components/Community'
+import TemplatesPage from '@/components/TemplatesPage'
 import { setActor } from '@/lib/activity'
 import HrDesk from '@/components/HrDesk'
 import Profile from '@/components/Profile'
@@ -29,7 +31,7 @@ import Portal from '@/components/Portal'
 const ICONS: Record<string, any> = {
   Dashboard: LayoutDashboard, 'HR Desk': ClipboardCheck, Profile: UserCircle, Portal: UserCircle, Attendance: Camera, Employees: UsersIcon, Departments: Building2, Holidays: CalendarDays,
   Leave: CalendarCheck, Records: ClipboardList, Reports: BarChart3, Letters: Mail, 'ID Cards': CreditCard, Payroll: Wallet,
-  Candidates: FileText, Interviews: CalendarCheck, Jobs: Briefcase, Assistant: Bot, Users: ShieldCheck, Settings: Cog
+  Community: MessageCircle, Templates: Mail, Candidates: FileText, Interviews: CalendarCheck, Jobs: Briefcase, Assistant: Bot, Users: ShieldCheck, Settings: Cog
 }
 
 function Clock({ tz }: { tz: string }) {
@@ -78,7 +80,7 @@ export default function Home() {
     setMe(out)
     if (out.profile) setActor({ id: out.profile.id, name: out.profile.name, role: out.role })
     if (out.role && out.status === 'active' && !page) {
-      const first = NAV.flatMap(g => g.items).filter(i => !LINKS[i]).find(i => ACCESS[i].includes(out.role)) || ''
+      const first = SECTIONS.flatMap(s => s.pages).filter(i => !LINKS[i]).find(i => ACCESS[i].includes(out.role)) || ''
       setPage(out.role === 'hr' ? 'HR Desk' : first)
     }
   }
@@ -115,12 +117,15 @@ export default function Home() {
     Departments: <Departments company={company} />, Holidays: <Holidays company={company} />,
     Letters: <Letters company={company} />, Leave: <Leaves company={company} />, Records: <Records company={company} />,
     Reports: <Reports company={company} canEdit={!!WRITE.Reports.includes(me.role)} />, Payroll: <Payroll company={company} />,
+    Community: <Community company={company} profile={me.profile} role={me.role} />, Templates: <TemplatesPage company={company} />,
     Assistant: <Assistant />, Users: <UsersPage company={company} onCode={(c: string) => setMe({ ...me, company: { ...company, join_code: c } })} />,
     Settings: <Settings company={company} onSaved={(c: any) => setMe({ ...me, company: c })} />
   }
   const [title, sub] = TITLES[page] || ['', '']
   const email = session.user.email || ''
   const readOnly = !canWrite && !SELF_CONTAINED.includes(page)
+  const section = SECTIONS.find(sc => sc.pages.includes(page))
+  const tabs = section ? section.pages.filter(p => ACCESS[p]?.includes(me.role)) : []
 
   return (
     <div className="app">
@@ -128,19 +133,12 @@ export default function Home() {
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
       <aside className={'side' + (open ? ' open' : '')}>
         <div className="brandlogo inside"><img src="/logo.png" alt="HR Nest" /></div>
-        {NAV.map(g => {
-          const items = g.items.filter(i => ACCESS[i].includes(me.role))
-          if (!items.length) return null
-          return (
-            <div key={g.label}>
-              <div className="navlabel">{g.label}</div>
-              {items.map(i => {
-                const Icon = ICONS[i] || LayoutDashboard
-                if (LINKS[i]) return <a key={i} className="navitem" href={LINKS[i]} target="_blank" rel="noopener noreferrer"><Icon size={18} />{LABEL[i] || i}<ExternalLink size={13} style={{ marginLeft: 'auto', opacity: .6 }} /></a>
-                return <button key={i} className={'navitem' + (page === i ? ' on' : '')} onClick={() => go(i)}><Icon size={18} />{LABEL[i] || i}</button>
-              })}
-            </div>
-          )
+        {SECTIONS.map(sec => {
+          const pages = sec.pages.filter(p => ACCESS[p]?.includes(me.role))
+          const first = pages.find(p => !LINKS[p])
+          if (!first) return null
+          const Icon = ICONS[sec.icon] || LayoutDashboard
+          return <button key={sec.id} className={'navitem' + (section?.id === sec.id ? ' on' : '')} onClick={() => go(first)}><Icon size={18} />{sec.label}</button>
         })}
         <div className="me">
           <button className="avatar sm mebtn" title="My profile" onClick={() => go('Profile')}>{me.profile?.avatar ? <img src={me.profile.avatar} alt="" /> : (me.profile?.name || email)[0]?.toUpperCase()}</button>
@@ -166,6 +164,13 @@ export default function Home() {
           </div>
         </div>
         <div className="content">
+          {tabs.length > 1 && (
+            <div className="sectabs">
+              {tabs.map(p => LINKS[p]
+                ? <a key={p} className="sectab" href={LINKS[p]} target="_blank" rel="noopener noreferrer">{TABLABEL[p] || LABEL[p] || p} <ExternalLink size={12} /></a>
+                : <button key={p} className={'sectab' + (page === p ? ' on' : '')} onClick={() => go(p)}>{TABLABEL[p] || LABEL[p] || p}</button>)}
+            </div>
+          )}
           {readOnly && <p className="muted">View only: your role cannot change anything on this page.</p>}
           <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>{view[page]}</fieldset>
         </div>
