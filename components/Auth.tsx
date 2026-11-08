@@ -41,7 +41,7 @@ export function Login() {
 
   return (
     <div className="auth">
-      <div className="logo" style={{ marginBottom: 20 }}><span>✓</span>HR Nest</div>
+      <div className="brandlogo tile"><img src="/logo.png" alt="HR Nest" /></div>
       <div className="card">
         <h2 style={{ marginTop: 0 }}>{mode === 'in' ? 'Sign in' : 'Create your account'}</h2>
         {mode === 'up' && (

@@ -46,7 +46,7 @@ function Clock({ tz }: { tz: string }) {
 function Notice({ title, text, children }: { title: string; text: string; children?: any }) {
   return (
     <div className="auth">
-      <div className="logo" style={{ marginBottom: 20 }}><span>✓</span>HR Nest</div>
+      <div className="brandlogo tile"><img src="/logo.png" alt="HR Nest" /></div>
       <div className="card">
         <h2 style={{ marginTop: 0 }}>{title}</h2>
         <p className="muted">{text}</p>
@@ -127,7 +127,7 @@ export default function Home() {
       {kiosk && <Kiosk company={company} onExit={() => setKiosk(false)} />}
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
       <aside className={'side' + (open ? ' open' : '')}>
-        <div className="logo" style={{ padding: '0 6px 8px' }}><span>✓</span>HR Nest</div>
+        <div className="brandlogo side"><img src="/logo.png" alt="HR Nest" /></div>
         {NAV.map(g => {
           const items = g.items.filter(i => ACCESS[i].includes(me.role))
           if (!items.length) return null

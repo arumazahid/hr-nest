@@ -25,7 +25,7 @@ export default function Reset() {
 
   return (
     <div className="auth">
-      <div className="logo" style={{ marginBottom: 20 }}><span>✓</span>HR Nest</div>
+      <div className="brandlogo tile"><img src="/logo.png" alt="HR Nest" /></div>
       <div className="card">
         {done ? (
           <><h2 style={{ marginTop: 0 }}>Password changed</h2><a className="btn" style={{ display: 'inline-block', textDecoration: 'none' }} href="/">Go to HR Nest</a></>

@@ -165,22 +165,39 @@ export default function Candidates({ company }: { company: any }) {
       )}
       {view === 'rank' && (
         <>
-          <div className="card">
-            <div className="grid">
-              <div><label>CVs are for this job</label>
-                <select value={jobId} onChange={e => setJobId(e.target.value)}>{jobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}</select></div>
-              <div><label>Upload CVs (PDF, DOCX or image)</label>
-                <input type="file" multiple accept=".pdf,.docx,.png,.jpg,.jpeg" onChange={e => setFiles(Array.from(e.target.files || []))} /></div>
+          <div className="upgrid">
+            <div className="card">
+              <h3>1. Choose the job</h3>
+              <p className="muted">Every CV is scored against all your open jobs. Pick the job whose ranking you want to see.</p>
+              <select value={jobId} onChange={e => setJobId(e.target.value)}>{jobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}</select>
+              <label>Or read a link (portfolio, online CV, PDF link)</label>
+              <div className="linkrow">
+                <input placeholder="https://..." value={link} onChange={e => setLink(e.target.value)} />
+                <button className="btn ghost sm" disabled={busy} onClick={addLink}>Read link</button>
+              </div>
+              <p className="muted">Pages that need a login (like LinkedIn) cannot be read.</p>
             </div>
-            <button className="btn" disabled={busy} onClick={analyze}>{busy ? 'Working...' : files.length > 1 ? `Score ${files.length} CVs` : 'Score CVs'}</button>
-            <label>Or paste a link (portfolio, online CV, or a PDF link)</label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <input style={{ flex: 1, minWidth: 220 }} placeholder="https://..." value={link} onChange={e => setLink(e.target.value)} />
-              <button className="btn ghost" style={{ marginTop: 0 }} disabled={busy} onClick={addLink}>Read link</button>
+            <div className="card">
+              <h3>2. Add CVs</h3>
+              <label className={'dropzone' + (files.length ? ' has' : '')}>
+                <input type="file" multiple hidden accept=".pdf,.docx,.png,.jpg,.jpeg" onChange={e => setFiles(Array.from(e.target.files || []))} />
+                <b>{files.length ? `${files.length} CV${files.length > 1 ? 's' : ''} selected` : 'Click to choose CVs'}</b>
+                <span className="muted">{files.length ? files.slice(0, 3).map(f => f.name).join(', ') + (files.length > 3 ? ' and more' : '') : 'PDF, DOCX or image. You can pick many at once.'}</span>
+              </label>
+              <button className="btn" style={{ width: '100%' }} disabled={busy || !files.length} onClick={analyze}>{busy ? 'Working...' : files.length > 1 ? `Score ${files.length} CVs` : 'Score CVs'}</button>
             </div>
-            <p className="muted">Every CV is scored against all your open jobs. Pages that need JavaScript or a login (like LinkedIn) cannot be read.</p>
-            {msg && <div className={msg.includes('scored') || msg.includes('scheduled') ? 'ok' : 'err'}>{msg}</div>}
           </div>
+          {msg && <div className={'banner ' + (msg.includes('scored') || msg.includes('scheduled') ? 'okbanner' : 'errbanner')}>{msg}</div>}
+          {rows.length > 0 && (
+            <div className="levels">
+              {[['Perfect Match', '80+'], ['Good Match', '65-79'], ['Average', '45-64'], ['Bad Match', 'under 45']].map(([l, r]) => (
+                <div key={l} className="lvl" style={{ borderTopColor: COLORS[l] }}>
+                  <small>{l} <span className="muted">({r})</span></small>
+                  <b style={{ color: COLORS[l] }}>{rows.filter(x => x.level === l).length}</b>
+                </div>
+              ))}
+            </div>
+          )}
           {jobs.length === 0 && <p className="muted">Add a job in the Jobs page first.</p>}
           {jobId && rows.length === 0 && jobs.length > 0 && <p className="muted">No CVs scored for this job yet.</p>}
           {rows.map(r => {
