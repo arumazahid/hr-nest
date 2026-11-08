@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   await a.db.from('candidates').update({ status: 'interview' }).eq('id', cand.id)
-  const m = inviteMail(a.co, cand.name, iv, job?.title)
+  const m = b.subject && b.body ? { subject: String(b.subject), text: String(b.body) } : inviteMail(a.co, cand.name, iv, job?.title)
   const sent = await sendMail(a.db, a.co, cand.email, m.subject, m.text)
   return NextResponse.json({ ok: true, emailed: sent.ok, reason: sent.reason })
 }

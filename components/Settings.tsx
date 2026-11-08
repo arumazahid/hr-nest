@@ -26,6 +26,9 @@ const FIELDS: [string, string, string][] = [
   ['tagline', 'Tagline (shown on payslips)', 'text'],
   ['website', 'Website', 'text'],
   ['contact_email', 'HR contact email (shown on documents)', 'email'],
+  ['hr_name', 'HR / admin name (signs the emails to candidates)', 'text'],
+  ['hr_title', 'HR / admin job title (for example HR Manager)', 'text'],
+  ['reply_to_email', 'Replies from candidates go to this email (optional, can be your personal email)', 'email'],
   ['address', 'Address / location (shown on documents)', 'text'],
   ['phone', 'Phone (shown on letters)', 'text'],
   ['imap_email', 'Gmail inbox that receives CVs', 'email']

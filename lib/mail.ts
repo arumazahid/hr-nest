@@ -14,7 +14,7 @@ export async function sendMail(db: any, co: any, to: string | null | undefined, 
       host: 'smtp.gmail.com', port: 465, secure: true,
       auth: { user: co.imap_email, pass: decrypt(sec.imap_password_enc) }
     })
-    await transport.sendMail({ from: `${co.name} <${co.imap_email}>`, to, subject, text })
+    await transport.sendMail({ from: `${co.name} <${co.imap_email}>`, to, subject, text, replyTo: co.reply_to_email || undefined })
     return { ok: true }
   } catch (e: any) {
     return { ok: false, reason: 'Gmail did not accept the email (' + String(e?.message || e).slice(0, 120) + '). Check the app password in Settings' }
