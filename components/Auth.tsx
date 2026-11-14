@@ -77,12 +77,18 @@ export function Setup({ userId, onDone }: { userId: string; onDone: (c: any) => 
   const [name, setName] = useState('')
   const [country, setCountry] = useState('')
   const [currency, setCurrency] = useState('USD')
+  const [aiKey, setAiKey] = useState('')
   const [msg, setMsg] = useState('')
 
   async function save() {
     if (!name.trim()) return setMsg('Enter your company name')
     const { data, error } = await sb.from('companies').insert({ owner_id: userId, name, country, currency }).select().single()
     if (error) return setMsg(error.message)
+    if (aiKey.trim()) {
+      const { data: sess } = await sb.auth.getSession()
+      const res = await fetch('/api/ai-key', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + sess.session?.access_token }, body: JSON.stringify({ key: aiKey }) })
+      if (!res.ok) { const out = await res.json(); alert('Your company is ready, but the AI key was not saved: ' + out.error + '\n\nYou can add it later in Settings.') }
+    }
     onDone(data)
   }
 
@@ -96,6 +102,8 @@ export function Setup({ userId, onDone }: { userId: string; onDone: (c: any) => 
         <input value={country} onChange={e => setCountry(e.target.value)} />
         <label>Currency</label>
         <input value={currency} onChange={e => setCurrency(e.target.value.toUpperCase())} />
+        <label>Your AI key (optional, Gemini, OpenAI or Claude. You can add it later)</label>
+        <PasswordInput value={aiKey} onChange={setAiKey} autoComplete="off" placeholder="AIza... or sk-... or sk-ant-..." />
         {msg && <div className="err">{msg}</div>}
         <button className="btn" style={{ width: '100%' }} onClick={save}>Continue</button>
         <button className="btn ghost" style={{ width: '100%' }} onClick={() => sb.auth.signOut()}>Sign out</button>

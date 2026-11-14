@@ -109,7 +109,7 @@ export default function Home() {
   const canWrite = WRITE[page]?.includes(me.role)
   const go = (p: string, prm = '') => { setPage(p); setParam(prm); setOpen(false) }
   const view: Record<string, any> = {
-    Dashboard: <Dashboard company={company} role={me.role} name={me.profile?.name} />, 'HR Desk': <HrDesk company={company} role={me.role} go={go} />,
+    Dashboard: <Dashboard company={company} role={me.role} name={me.profile?.name} go={go} />, 'HR Desk': <HrDesk company={company} role={me.role} go={go} />,
     Profile: <Profile profile={me.profile} email={session.user.email || ''} role={me.role} onSaved={(p: any) => setMe({ ...me, profile: p })} />, Portal: <Portal />, Candidates: <Candidates company={company} />,
     Interviews: <Interviews company={company} />, Jobs: <Jobs company={company} />,
     Employees: <Employees company={company} onOpenCard={(id: string) => window.open('/id-cards?emp=' + id, '_blank')} />,

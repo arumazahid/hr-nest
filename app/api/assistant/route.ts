@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authed } from '@/lib/auth'
 import { localParts } from '@/lib/attendance'
+import { loadAi, generateText } from '@/lib/ai'
 
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   const a = await authed(req, ['admin', 'hr', 'viewer'])
   if (!a) return NextResponse.json({ error: 'Not allowed for your account, or your session expired' }, { status: 401 })
-  if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 })
   const { question } = await req.json()
   const { db, co } = a
+  const ai = await loadAi(db, co.id)
+  if (!ai) return NextResponse.json({ answer: 'Add your AI key in Settings (Admin) to use the Assistant.' })
   const { day } = localParts(co.timezone)
   const q = (t: string, cols: string) => db.from(t).select(cols).eq('company_id', co.id)
   const [emps, att, lv, jobs, sc, pay] = await Promise.all([
@@ -35,16 +37,6 @@ export async function POST(req: NextRequest) {
     `Latest payroll (${month || 'none yet'}): total net ${total}.`,
     `Open jobs and top candidates: ${hiring.join(' | ') || 'none'}.`
   ].join('\n')
-  const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash'
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: 'You are the HR assistant for a small company. Answer briefly in plain sentences using only this data. If the data does not contain the answer, say so.\n' + context }] },
-      contents: [{ role: 'user', parts: [{ text: String(question) }] }]
-    })
-  })
-  const j = await res.json()
-  const answer = (j?.candidates?.[0]?.content?.parts || []).map((p: any) => p.text || '').join('')
-  return NextResponse.json({ answer: answer || j?.error?.message || 'No answer received' })
+  const r = await generateText(ai, 'You are the HR assistant for a small company. Answer briefly in plain sentences using only this data. If the data does not contain the answer, say so.\n' + context, String(question))
+  return NextResponse.json({ answer: r.text || `The AI could not answer (${r.error}). Check your AI key and model in Settings.` })
 }

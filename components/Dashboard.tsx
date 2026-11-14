@@ -57,7 +57,7 @@ function Donut({ parts, total }: { parts: [string, number, string][]; total: num
   )
 }
 
-export default function Dashboard({ company, role, name }: { company: any; role: string; name?: string }) {
+export default function Dashboard({ company, role, name, go }: { company: any; role: string; name?: string; go?: (p: string) => void }) {
   const today = new Date().toLocaleDateString('en-CA', { timeZone: company.timezone })
   const [d, setD] = useState<any>(null)
   const [busy, setBusy] = useState(false)
@@ -161,6 +161,9 @@ export default function Dashboard({ company, role, name }: { company: any; role:
           <span><b>{d.present}</b> in today</span><span><b>{d.away}</b> on leave</span><span><b>{d.pending}</b> leave requests</span>
         </div>
       </div>
+      {(role === 'admin' || role === 'hr') && !company.ai_provider && (
+        <div className="banner">Add your AI key to read scanned CVs and use the Assistant. {role === 'admin' && go ? <button className="linkbtn" onClick={() => go('Settings')}>Add it in Settings</button> : 'Ask your admin to add it in Settings.'}</div>
+      )}
       {d.off && <div className="banner">Today is a {d.off === 'weekend' ? 'weekend' : `holiday (${d.off})`}. Absences are not counted.</div>}
       {d.total === 0 && <div className="banner">No employees yet. Add your first employee in the Employees page.</div>}
 

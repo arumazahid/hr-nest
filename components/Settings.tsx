@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { sb } from '@/lib/supabase'
 import { resizeImage } from '@/lib/image'
 import PasswordInput from './PasswordInput'
+import AiKey from './AiKey'
 import { toast } from './Toast'
 import { logActivity } from '@/lib/activity'
 
@@ -78,6 +79,7 @@ export default function Settings({ company, onSaved }: { company: any; onSaved: 
 
   return (
     <>
+      <AiKey company={company} onChange={(patch: any) => onSaved({ ...company, ...patch })} />
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Business settings</h3>
         <p className="muted">Attendance and payroll will use these rules once those modules are added.</p>
