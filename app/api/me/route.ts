@@ -9,8 +9,8 @@ export async function GET(req: NextRequest) {
   const profile = a.staff
     ? { id: a.user.id, name: a.staff.name || a.user.email, avatar: a.staff.avatar_url || null }
     : { id: a.user.id, name: owner_name || a.user.email, avatar: owner_avatar || null }
-  if (a.role === 'employee') {
-    return NextResponse.json({ status: 'active', role: 'employee', profile, company: { id: co.id, name: co.name, currency: co.currency, timezone: co.timezone, brand_primary: co.brand_primary, brand_accent: co.brand_accent } })
+  if (a.role === 'employee' || a.role === 'manager') {
+    return NextResponse.json({ status: 'active', role: a.role, profile, company: { id: co.id, name: co.name, currency: co.currency, timezone: co.timezone, brand_primary: co.brand_primary, brand_accent: co.brand_accent } })
   }
   const { data: sec } = await a.db.from('company_secrets').select('company_id').eq('company_id', a.co.id).maybeSingle()
   return NextResponse.json({ status: 'active', role: a.role, profile, company: { ...co, has_imap_password: !!sec } })

@@ -4,6 +4,7 @@ import { LayoutDashboard, Camera, Users as UsersIcon, Building2, Wallet, FileTex
 import { sb } from '@/lib/supabase'
 import { ACCESS, WRITE, SECTIONS, LABEL, TABLABEL, TITLES, SELF_CONTAINED, LINKS } from '@/lib/roles'
 import Community from '@/components/Community'
+import TeamHome from '@/components/TeamHome'
 import TemplatesPage from '@/components/TemplatesPage'
 import { setActor } from '@/lib/activity'
 import HrDesk from '@/components/HrDesk'
@@ -29,7 +30,7 @@ import Letters from '@/components/Letters'
 import Portal from '@/components/Portal'
 
 const ICONS: Record<string, any> = {
-  Dashboard: LayoutDashboard, 'HR Desk': ClipboardCheck, Profile: UserCircle, Portal: UserCircle, Attendance: Camera, Employees: UsersIcon, Departments: Building2, Holidays: CalendarDays,
+  Dashboard: LayoutDashboard, 'HR Desk': ClipboardCheck, Team: UsersIcon, Profile: UserCircle, Portal: UserCircle, Attendance: Camera, Employees: UsersIcon, Departments: Building2, Holidays: CalendarDays,
   Leave: CalendarCheck, Records: ClipboardList, Reports: BarChart3, Letters: Mail, 'ID Cards': CreditCard, Payroll: Wallet,
   Community: MessageCircle, Templates: Mail, Candidates: FileText, Interviews: CalendarCheck, Jobs: Briefcase, Assistant: Bot, Users: ShieldCheck, Settings: Cog
 }
@@ -117,7 +118,7 @@ export default function Home() {
     Departments: <Departments company={company} />, Holidays: <Holidays company={company} />,
     Letters: <Letters company={company} />, Leave: <Leaves company={company} />, Records: <Records company={company} />,
     Reports: <Reports company={company} canEdit={!!WRITE.Reports.includes(me.role)} />, Payroll: <Payroll company={company} />,
-    Community: <Community company={company} profile={me.profile} role={me.role} />, Templates: <TemplatesPage company={company} />,
+    Team: <TeamHome name={me.profile?.name} />, Community: <Community company={company} profile={me.profile} role={me.role} />, Templates: <TemplatesPage company={company} />,
     Assistant: <Assistant />, Users: <UsersPage company={company} onCode={(c: string) => setMe({ ...me, company: { ...company, join_code: c } })} />,
     Settings: <Settings company={company} onSaved={(c: any) => setMe({ ...me, company: c })} />
   }

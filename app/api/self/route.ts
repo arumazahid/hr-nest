@@ -16,7 +16,7 @@ async function who(req: NextRequest, token: string) {
     return { db, emp }
   }
   const a = await authed(req)
-  if (!a || a.role !== 'employee' || !a.staff?.employee_id) return { db: admin(), emp: null }
+  if (!a || !['employee', 'manager'].includes(a.role) || !a.staff?.employee_id) return { db: admin(), emp: null }
   const { data: emp } = await a.db.from('employees').select('*, companies(*)').eq('id', a.staff.employee_id).eq('active', true).maybeSingle()
   return { db: a.db, emp }
 }

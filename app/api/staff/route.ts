@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const a = await authed(req, ['admin', 'hr'])
   if (!a) return NextResponse.json({ error: 'Not allowed' }, { status: 403 })
-  const { id, action, employeeId, password } = await req.json()
+  const { id, action, employeeId, password, role: newRole } = await req.json()
   const { data: st } = await a.db.from('staff').select('*').eq('id', id).eq('company_id', a.co.id).maybeSingle()
   if (!st) return NextResponse.json({ error: 'Request not found' }, { status: 404 })
   const who = st.name || st.email
@@ -67,6 +67,14 @@ export async function PATCH(req: NextRequest) {
     const { error } = await a.db.auth.admin.updateUserById(st.user_id, { password })
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     await log(a, 'Reset password', who)
+    return NextResponse.json({ ok: true })
+  }
+
+  if (action === 'set_role') {
+    if (st.status !== 'active' || !st.employee_id || !['employee', 'manager'].includes(st.role) || !['employee', 'manager'].includes(newRole))
+      return NextResponse.json({ error: 'Only approved employees can be made a manager or changed back' }, { status: 400 })
+    await a.db.from('staff').update({ role: newRole }).eq('id', id)
+    await log(a, 'Changed role', `${who}: ${st.role} to ${newRole}`)
     return NextResponse.json({ ok: true })
   }
 

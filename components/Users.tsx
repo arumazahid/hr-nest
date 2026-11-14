@@ -11,6 +11,7 @@ const ROLES: [string, string][] = [
   ['hr', 'HR Desk, hiring, employees, attendance, leave, performance remarks, ID cards, letters'],
   ['payroll', 'Payroll and payslips, can view employees'],
   ['viewer', 'Read-only access (no payroll)'],
+  ['manager', 'Own portal plus My Team: the people in their own department (attendance, leave requests, remarks). Made from an approved employee on the Users page'],
   ['employee', 'Own portal only: own attendance, leave, payslips and HR remarks (needs the company code, Employee ID and approval)']
 ]
 
@@ -148,6 +149,9 @@ export default function Users({ company, onCode }: { company: any; onCode: (code
                   <div className="avatar sm">{s.avatar_url ? <img src={s.avatar_url} alt="" /> : (s.name || s.email)[0].toUpperCase()}</div>
                   <div style={{ flex: 1, minWidth: 180 }}><b>{s.name || s.email}</b><div className="muted">{s.email}</div></div>
                   <span className="tag">{s.role}</span>{s.status !== 'active' && <span className="tag warn">{s.status}</span>}
+                  {s.employee_id && s.status === 'active' && (s.role === 'employee' || s.role === 'manager') && (
+                    <button className="btn ghost sm" onClick={async () => { const o = await call('PATCH', '', { id: s.id, action: 'set_role', role: s.role === 'manager' ? 'employee' : 'manager' }); o.error ? toast(o.error, 'err') : (toast(s.role === 'manager' ? 'Now an employee' : 'Now a manager of their own team'), load()) }}>{s.role === 'manager' ? 'Make employee' : 'Make manager'}</button>
+                  )}
                   {s.user_id && <button className="btn ghost sm" onClick={() => setReset({ id: s.id, pw: '' })}><KeyRound size={14} /> Reset password</button>}
                   <button className="btn ghost sm" onClick={async () => { if (confirm('Remove this user?')) { const o = await call('DELETE', '?id=' + s.id); o.error ? toast(o.error, 'err') : (toast('User removed'), load()) } }}>Remove</button>
                 </div>

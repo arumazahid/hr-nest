@@ -409,3 +409,11 @@ tbody tr:hover { background: #FAFBFD }
 .replybox { display: flex; gap: 8px }
 .replybox input { flex: 1 }
 @media (max-width: 900px) { .commgrid { grid-template-columns: 1fr } }
+
+/* getting started checklist */
+.gettingstarted { background: linear-gradient(180deg, #FFFBEB, #fff); border-color: #FDE68A }
+.gsrow { display: flex; gap: 14px; align-items: center; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-top: 8px; cursor: pointer; font: inherit; transition: border-color .15s }
+.gsrow:hover { border-color: #FACC15 }
+.gsrow.done { opacity: .55 }
+.gsnum { width: 30px; height: 30px; border-radius: 50%; background: #FEF3C7; color: #713F12; display: flex; align-items: center; justify-content: center; font-weight: 800; flex: none }
+.gsrow.done .gsnum { background: #DCFCE7; color: #166534 }

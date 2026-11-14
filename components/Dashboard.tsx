@@ -161,9 +161,30 @@ export default function Dashboard({ company, role, name, go }: { company: any; r
           <span><b>{d.present}</b> in today</span><span><b>{d.away}</b> on leave</span><span><b>{d.pending}</b> leave requests</span>
         </div>
       </div>
-      {(role === 'admin' || role === 'hr') && !company.ai_provider && (
-        <div className="banner">Add your AI key to read scanned CVs and use the Assistant. {role === 'admin' && go ? <button className="linkbtn" onClick={() => go('Settings')}>Add it in Settings</button> : 'Ask your admin to add it in Settings.'}</div>
+      {role === 'hr' && !company.ai_provider && (
+        <div className="banner">Ask your admin to add the AI key in Settings. It is needed to read scanned CVs and to use the Assistant.</div>
       )}
+      {role === 'admin' && go && (() => {
+        const steps: [string, string, boolean, string][] = [
+          ['Add your AI key', 'Reads scanned CVs and answers in the Assistant', !!company.ai_provider, 'Settings'],
+          ['Connect your company Gmail', 'Sends interview and selection emails, and collects CVs', !!company.imap_email, 'Settings'],
+          ['Fill in your company details', 'Address and phone appear on letters and emails', !!(company.address && company.phone), 'Settings'],
+          ['Create your first job', 'CVs are scored against your jobs', d.jobs > 0, 'Jobs'],
+          ['Add your employees', 'For attendance, leave and payroll', d.total > 0, 'Employees']
+        ]
+        const left = steps.filter(x => !x[2]).length
+        if (!left) return null
+        return (
+          <div className="card gettingstarted">
+            <h3>Getting started <span className="muted">({steps.length - left} of {steps.length} done)</span></h3>
+            {steps.map(([t, h, done, page], i) => (
+              <button key={t} className={'gsrow' + (done ? ' done' : '')} onClick={() => go(page)}>
+                <span className="gsnum">{done ? '✓' : i + 1}</span><span><b>{t}</b><br /><span className="muted">{h}</span></span>
+              </button>
+            ))}
+          </div>
+        )
+      })()}
       {d.off && <div className="banner">Today is a {d.off === 'weekend' ? 'weekend' : `holiday (${d.off})`}. Absences are not counted.</div>}
       {d.total === 0 && <div className="banner">No employees yet. Add your first employee in the Employees page.</div>}
 
